@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+
+  couchbase:
+    image: couchbase:community
+    container_name: courier_couchbase
+    ports:
+      - "8091-8096:8091-8096"
+      - "11210:11210"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8091"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  couchbase-init:
+    image: couchbase:community
+    container_name: courier_couchbase_init
+    depends_on:
+      couchbase:
+        condition: service_healthy
+    volumes:
+      - ./docker/couchbase-init.sh:/init.sh
+    entrypoint: ["/bin/bash", "/init.sh"]
+
+  app:
+    container_name: courier_app
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      couchbase-init:
+        condition: service_completed_successfully
+    environment:
+      SPRING_COUCHBASE_CONNECTION_STRING: couchbase://couchbase
+      SPRING_COUCHBASE_USERNAME: Administrator
+      SPRING_COUCHBASE_PASSWORD: password
+      SPRING_COUCHBASE_BUCKET_NAME: courier_bucket

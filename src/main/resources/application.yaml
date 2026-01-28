@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: couriertracking
+  couchbase:
+    connection-string: couchbase://127.0.0.1
+    username: Administrator
+    password: password
+    bucket-name: courier_bucket
+    env:
+      io:
+        networkResolution: external
+      timeouts:
+        connect: 1000ms
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
